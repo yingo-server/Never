@@ -5,7 +5,7 @@
     "GMEEK_VERSION": "last",
     "UTC":8,
     "bottomText":"转载请注明出处",
-    "needComment":0,
+    "needComment":1,
     "script":"<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>",
     "script":"<script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>",
     "singlePage":["about"],
