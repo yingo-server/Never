@@ -1,2 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Blog Title</title><link>https://yingo-server.github.io/Never</link><description>Blog description</description><copyright>Blog Title</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://github.githubassets.com/favicons/favicon.svg</url><title>avatar</title><link>https://yingo-server.github.io/Never</link></image><lastBuildDate>Tue, 30 Jun 2026 11:25:19 +0000</lastBuildDate><managingEditor>Blog Title</managingEditor><ttl>60</ttl><webMaster>Blog Title</webMaster></channel></rss>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>不能存在的一日</title><link>https://yingo-server.github.io/Never</link><description>这是美好的日子，也是苦难的日子。
+ 这是才华横溢的年代，也是愚昧无知的年代。
+ 这是信仰坚定的时期，也是怀疑一切的时期。
+ 这是灿烂辉煌的季节，也是黯淡无光的季节。
+ 这是希望的春天，也是绝望的冬天。
+ 我们拥有选择一切的机会，我们其实一无所有。
+ 我们走在通向天堂的道路上，我们正坠入万劫不复的地狱。</description><copyright>不能存在的一日</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>http://q.qlogo.cn/headimg_dl?dst_uin=3449776312&amp;spec=640&amp;img_type=jpg</url><title>avatar</title><link>https://yingo-server.github.io/Never</link></image><lastBuildDate>Tue, 30 Jun 2026 11:36:27 +0000</lastBuildDate><managingEditor>不能存在的一日</managingEditor><ttl>60</ttl><webMaster>不能存在的一日</webMaster></channel></rss>
