@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="http:/q.qlogo.cn/headimg_dl?dst_uin=3449776312&spec=640&img_type=jpg"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 从零到一：在 Android 4.4 手表上构建电子书阅读器的完整开发纪实
+
+**作者**：开发团队  
+**发布时间**：2026 年 7 月 1 日  
+**标签**：#Android 4.4 #Java 7 #TLS 1.2 #低内存优化 #电子书阅读器  
+
+---
+
+## 一、项目缘起与目标
+
+我们的目标是为一款配备 240x240 像素屏幕、可用内存仅约 60MB 的 Android 4.4 手表开发一款电子书阅读器。">
+<meta property="og:title" content="从零到一：在 Android 4.4 手表上构建电子书阅读器的完整开发纪实">
+<meta property="og:description" content="# 从零到一：在 Android 4.4 手表上构建电子书阅读器的完整开发纪实
+
+**作者**：开发团队  
+**发布时间**：2026 年 7 月 1 日  
+**标签**：#Android 4.4 #Java 7 #TLS 1.2 #低内存优化 #电子书阅读器  
+
+---
+
+## 一、项目缘起与目标
+
+我们的目标是为一款配备 240x240 像素屏幕、可用内存仅约 60MB 的 Android 4.4 手表开发一款电子书阅读器。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://yingo-server.github.io/Never/post/cong-ling-dao-yi-%EF%BC%9A-zai-%20Android%204.4%20-shou-biao-shang-gou-jian-dian-zi-shu-yue-du-qi-de-wan-zheng-kai-fa-ji-shi.html">
+<meta property="og:image" content="http:/q.qlogo.cn/headimg_dl?dst_uin=3449776312&spec=640&img_type=jpg">
+<title>从零到一：在 Android 4.4 手表上构建电子书阅读器的完整开发纪实</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">从零到一：在 Android 4.4 手表上构建电子书阅读器的完整开发纪实</h1>
+<div class="title-right">
+    <a href="https://yingo-server.github.io/Never" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/yingo-server/Never/issues/2" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>从零到一：在 Android 4.4 手表上构建电子书阅读器的完整开发纪实</h1>
+<p><strong>作者</strong>：开发团队<br>
+<strong>发布时间</strong>：2026 年 7 月 1 日<br>
+<strong>标签</strong>：#Android 4.4 #Java 7 #TLS 1.2 #低内存优化 #电子书阅读器</p>
+<hr>
+<h2>一、项目缘起与目标</h2>
+<p>我们的目标是为一款配备 240x240 像素屏幕、可用内存仅约 60MB 的 Android 4.4 手表开发一款电子书阅读器。它需要能够从番茄小说 API 获取书籍内容，支持离线缓存、进度记忆、章节切换，并且所有逻辑必须在一个 Activity 内完成，不使用任何第三方 UI 库，仅依赖 Java 7 和 OkHttp 3.12.13。</p>
+<p>这是一项挑战——Android 4.4 发布于 2013 年，其默认的 SSL/TLS 实现仅支持 TLS 1.0/1.1，而现代 API 服务（包括我们使用的 <code class="notranslate">v3.rain.ink</code>）已强制要求 TLS 1.2。此外，低内存环境要求极简的 UI 渲染和高效的缓存管理。</p>
+<hr>
+<h2>二、开发历程与方案演进</h2>
+<p>本节按时间顺序详细记录了我们尝试过的所有方案、遇到的错误以及最终采用的解决路径。</p>
+<h3>第一阶段：初始实现与首次部署</h3>
+<p><strong>时间节点</strong>：项目启动初期</p>
+<p><strong>初始方案</strong>：</p>
+<ul>
+<li>使用 <code class="notranslate">HttpURLConnection</code> 直接请求 <code class="notranslate">http://v3.rain.ink/fanqie/</code>（HTTP 明文）。</li>
+<li>配置文件从 Gitee 拉取，书籍列表和 API Key 存储在 <code class="notranslate">config.ob</code> 中。</li>
+<li>UI 为 6×6 字符网格，每字符 40 像素。</li>
+</ul>
+<p><strong>遇到的问题</strong>：</p>
+<ol>
+<li>请求 <code class="notranslate">http://v3.rain.ink</code> 时，服务器返回 301/302 重定向到 HTTPS，OkHttp 默认自动跟随重定向，导致实际请求变为 HTTPS。</li>
+<li>Android 4.4 默认 SSL 实现不支持 TLS 1.2，抛出 <code class="notranslate">SSLHandshakeException: SSL protocol error</code>。</li>
+</ol>
+<p><strong>尝试的修复</strong>：</p>
+<ul>
+<li>在 <code class="notranslate">HttpURLConnection</code> 中设置 <code class="notranslate">setInstanceFollowRedirects(false)</code>，试图阻止重定向。</li>
+<li>结果：请求返回 302 状态码，但无法获取实际内容，因为服务器仅支持 HTTPS。</li>
+</ul>
+<p><strong>结论</strong>：必须解决 TLS 1.2 兼容性问题，无法绕过。</p>
+<hr>
+<h3>第二阶段：尝试通过代理服务器中转</h3>
+<p><strong>时间节点</strong>：第一阶段受阻后</p>
+<p><strong>方案描述</strong>：<br>
+自建 CORS 代理服务器（<code class="notranslate">cors.344977.xyz</code>），将请求转发至 <code class="notranslate">v3.rain.ink</code>，应用通过代理访问，期望代理服务器处理 TLS 握手。</p>
+<p><strong>遇到的问题</strong>：<br>
+代理服务器本身使用 HTTPS，Android 4.4 与代理服务器握手时仍然失败，抛出相同的 <code class="notranslate">SSLHandshakeException: SSL protocol error</code>。</p>
+<p><strong>日志输出</strong>：<br>
+javax.net.ssl.SSLHandshakeException: javax.net.ssl.SSLProtocolException: SSL handshake aborted: ssl=0x4c0ab308: Failure in SSL library, usually a protocol error</p>
+<p><strong>结论</strong>：代理未能解决问题，因为问题根源在于客户端本身不支持 TLS 1.2，而非目标服务器或代理的配置。</p>
+<hr>
+<h3>第三阶段：尝试使用 OkHttp 配置 TLS 1.2（首次尝试）</h3>
+<p><strong>时间节点</strong>：代理方案失败后</p>
+<p><strong>方案描述</strong>：<br>
+切换到 OkHttp 3.12.13，并尝试通过 <code class="notranslate">ConnectionSpec</code> 强制指定 TLS 1.2：</p>
+<pre class="notranslate"><code class="notranslate">ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+        .tlsVersions(TlsVersion.TLS_1_2)
+        .build();
+</code></pre>
+<p><strong>遇到的问题</strong>：<br>
+Android 4.4 的 <code class="notranslate">SSLContext.getInstance("TLSv1.2")</code> 抛出 <code class="notranslate">NoSuchAlgorithmException</code>，因为系统本身不支持该协议名。<code class="notranslate">catch</code> 块捕获异常后降级为默认客户端（无 TLS 1.2），实际仍然失败。</p>
+<p><strong>日志输出</strong>：<br>
+W/OpenBook: 请求异常: javax.net.ssl.SSLHandshakeException: javax.net.ssl.SSLProtocolException: SSL handshake aborted...</p>
+<p><strong>结论</strong>：<code class="notranslate">ConnectionSpec</code> 只能约束 OkHttp 的行为，但不能让系统凭空增加对 TLS 1.2 的支持。需要更换安全提供者。</p>
+<hr>
+<h3>第四阶段：尝试 ProviderInstaller（Google Play 服务方案）</h3>
+<p><strong>时间节点</strong>：OkHttp 配置失败后</p>
+<p><strong>方案描述</strong>：<br>
+使用 Google Play 服务的 <code class="notranslate">ProviderInstaller.installIfNeeded()</code> 更新系统的安全提供者，期望使 Android 4.4 原生支持 TLS 1.2。</p>
+<p><strong>遇到的问题</strong>：<br>
+目标设备为手表，未安装 Google Play 服务，调用 <code class="notranslate">ProviderInstaller.installIfNeeded()</code> 会抛出 <code class="notranslate">GooglePlayServicesNotAvailableException</code>。</p>
+<p><strong>结论</strong>：该方案依赖外部 Google 服务，在嵌入式设备上不可行，必须寻找不依赖 Play 服务的方案。</p>
+<hr>
+<h3>第五阶段：引入 Conscrypt 安全提供者（最终可行方案）</h3>
+<p><strong>时间节点</strong>：ProviderInstaller 失败后</p>
+<p><strong>方案描述</strong>：<br>
+引入 <code class="notranslate">org.conscrypt:conscrypt-android:2.5.2</code> 作为独立的安全提供者，在静态初始化块中注册：</p>
+<pre class="notranslate"><code class="notranslate">static {
+    try {
+        Security.insertProviderAt(Conscrypt.newProvider(), 1);
+    } catch (Throwable t) {
+        Log.e("OpenBook", "Conscrypt 注册失败: " + t.toString());
+    }
+}
+</code></pre>
+<p>然后使用 <code class="notranslate">SSLContext.getInstance("TLSv1.2", "Conscrypt")</code> 创建上下文，并配合 <code class="notranslate">ConnectionSpec</code> 强制 TLS 1.2。</p>
+<p><strong>验证日志</strong>：<br>
+D/OpenBook: Supported protocols: [TLSv1, TLSv1.1, TLSv1.2, TLSv1.3]<br>
+I/OpenBook: TLSv1.2 支持: true</p>
+<p><strong>遇到的问题</strong>：<br>
+TLS 1.2 握手成功，但出现新错误：<br>
+javax.net.ssl.SSLHandshakeException: java.security.cert.CertPathValidatorException: Trust anchor for certification path not found.</p>
+<p><strong>原因</strong>：Android 4.4 的系统证书库过于陈旧，无法验证现代根证书（如 Let's Encrypt 的 ISRG Root X1）。</p>
+<hr>
+<h3>第六阶段：绕过证书验证（测试环境方案）</h3>
+<p><strong>时间节点</strong>：Conscrypt 启用后</p>
+<p><strong>方案描述</strong>：<br>
+实现一个空的 <code class="notranslate">X509TrustManager</code>，信任所有证书，并允许所有主机名：</p>
+<pre class="notranslate"><code class="notranslate">final X509TrustManager trustAllManager = new X509TrustManager() {
+    @Override public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+    @Override public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+    @Override public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+};
+
+HostnameVerifier allowAll = new HostnameVerifier() {
+    @Override public boolean verify(String hostname, SSLSession session) { return true; }
+};
+</code></pre>
+<p><strong>验证日志</strong>：<br>
+I/OpenBook: 配置下载成功，内容长度: 171<br>
+I/OpenBook: 选择书籍: 我不是戏神 (ID: 7276384138653862966)<br>
+I/OpenBook: 章节加载完成: 1, 页: 0/351</p>
+<p><strong>结果</strong>：网络请求成功，章节内容正常获取。</p>
+<p><strong>风险说明</strong>：<br>
+此方案完全跳过证书验证和主机名验证，存在中间人攻击风险，仅适用于开发和测试环境。正式发布前应替换为证书锁定（Certificate Pinning）。</p>
+<hr>
+<h3>第七阶段：UI 与交互优化</h3>
+<p><strong>时间节点</strong>：网络层解决后</p>
+<p><strong>原始 UI 问题</strong>：</p>
+<ul>
+<li>6×6 网格，每屏仅 36 字符，阅读效率低。</li>
+<li>顶部状态栏和底部提示栏占据约 70 像素，进一步压缩内容区域。</li>
+<li>无章节选择功能，翻页只能逐章顺序进行。</li>
+</ul>
+<p><strong>逐步优化</strong>：</p>
+<ol>
+<li>网格从 6×6 调整为 8×8，再调整为 11×11，字体从 40px 降至 20px，每屏字符从 36 提升至 121。</li>
+<li>移除状态栏和底部提示栏，内容区域扩展至全屏。</li>
+<li>实现长按分区：上半屏长按进入章节选择列表，下半屏长按退出阅读。</li>
+<li>章节选择列表字体 14px，行高 18px，自动定位当前章节，高亮显示。</li>
+</ol>
+<hr>
+<h3>第八阶段：内容解码优化</h3>
+<p><strong>时间节点</strong>：UI 调整后</p>
+<p><strong>问题</strong>：<br>
+API 返回的 JSON 中包含 HTML 实体（如 <code class="notranslate">&amp;#34;</code> 表示双引号），直接显示为 <code class="notranslate">&amp;#34;</code>，影响阅读体验。</p>
+<p><strong>方案演进</strong>：</p>
+<ol>
+<li>最初使用手动字符串替换，将 <code class="notranslate">&amp;#34;</code> 替换为 <code class="notranslate">"</code>，但无法覆盖所有实体。</li>
+<li>改用 <code class="notranslate">Html.fromHtml(raw).toString()</code> 解码所有 HTML 实体和标签，一次性解决所有转义问题。</li>
+</ol>
+<p><strong>代码示例</strong>：</p>
+<pre class="notranslate"><code class="notranslate">private String cleanContent(String raw) {
+    String decoded = Html.fromHtml(raw).toString();
+    String warning = "为保证服务质量，免费用户请不要下书！或前往网站赞助后刷新隐藏该提示(赞助用户一天可下载一万章)";
+    decoded = decoded.replace(warning, "");
+    decoded = decoded.replaceAll("\n{3,}", "\n\n");
+    decoded = decoded.trim();
+    decoded = decoded.replace("\r\n", "\n").replace("\r", "\n");
+    return decoded;
+}
+</code></pre>
+<hr>
+<h3>第九阶段：缓存策略增强</h3>
+<p><strong>时间节点</strong>：内容解码完成后</p>
+<p><strong>问题</strong>：<br>
+每次加载章节都需要请求完整的目录列表（可能包含上千条记录），导致网络请求冗余。</p>
+<p><strong>解决方案</strong>：<br>
+在 <code class="notranslate">ChapterCache</code> 中新增目录缓存，存储于 <code class="notranslate">content.ob</code>，格式为 <code class="notranslate">itemId@title</code>，每行一个。优先读取缓存，若无则请求网络并缓存。</p>
+<p><strong>目录缓存格式示例</strong>：</p>
+<pre class="notranslate"><code class="notranslate">7276663560427471412@第1章 戏鬼回家
+7276826981654921789@第2章 我们在看着你
+7277563721739108875@第3章 灾厄
+</code></pre>
+<p><strong>效果</strong>：<br>
+章节列表加载速度从数秒降至毫秒级，且降低网络流量消耗。</p>
+<hr>
+<h3>第十阶段：日志自动清理</h3>
+<p><strong>时间节点</strong>：功能稳定后</p>
+<p><strong>问题</strong>：<br>
+日志文件随时间累积，可能占满有限的存储空间。</p>
+<p><strong>解决方案</strong>：<br>
+每次启动时扫描 <code class="notranslate">/openbook/logs/</code> 目录，仅保留当天日期（<code class="notranslate">yyyy-MM-dd</code>）开头的目录，其余全部递归删除。</p>
+<p><strong>代码实现</strong>：</p>
+<pre class="notranslate"><code class="notranslate">private void cleanOldLogs() {
+    String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
+    File logsDir = new File(LOG_DIR);
+    if (!logsDir.exists() || !logsDir.isDirectory()) return;
+    File[] children = logsDir.listFiles();
+    if (children == null) return;
+    for (File child : children) {
+        if (child.isDirectory()) {
+            String name = child.getName();
+            if (!name.startsWith(today)) {
+                deleteRecursive(child);
+            }
+        }
+    }
+}
+</code></pre>
+<hr>
+<h2>三、关键技术细节与经验总结</h2>
+<h3>3.1 TLS 1.2 兼容性的完整处理链路</h3>
+<ol>
+<li><strong>提供者注册</strong>：在 <code class="notranslate">static</code> 块中注册 Conscrypt，确保在任何网络请求前完成。</li>
+<li><strong>SSLContext 创建</strong>：使用 <code class="notranslate">SSLContext.getInstance("TLSv1.2", "Conscrypt")</code>，明确指定协议和提供者。</li>
+<li><strong>TrustManager 配置</strong>：测试环境使用空实现绕过证书验证；生产环境应实现证书锁定。</li>
+<li><strong>ConnectionSpec 强制</strong>：通过 <code class="notranslate">ConnectionSpec.Builder</code> 限定 <code class="notranslate">TlsVersion.TLS_1_2</code>，避免协商降级。</li>
+<li><strong>OkHttpClient 构建</strong>：将上述组件注入 <code class="notranslate">OkHttpClient.Builder</code>。</li>
+</ol>
+<h3>3.2 证书锁定的替代方案</h3>
+<p>若要在正式环境替换绕过验证，可采用证书锁定：</p>
+<pre class="notranslate"><code class="notranslate">CertificatePinner certificatePinner = new CertificatePinner.Builder()
+        .add("v3.rain.ink", "sha256/你的证书指纹")
+        .build();
+</code></pre>
+<p>将 <code class="notranslate">trustAllManager</code> 替换为系统默认 TrustManager，并添加 <code class="notranslate">certificatePinner</code>。</p>
+<h3>3.3 Android 4.4 开发注意事项</h3>
+<ul>
+<li><strong>Java 7 语法</strong>：所有匿名内部类中访问的局部变量必须声明 <code class="notranslate">final</code>。</li>
+<li><strong>无运行时权限</strong>：Android 4.4 安装时授予权限，禁止调用 <code class="notranslate">checkSelfPermission</code>。</li>
+<li><strong>无 AndroidX</strong>：使用传统 support 库或纯原生 API。</li>
+<li><strong>外部存储路径</strong>：<code class="notranslate">Environment.getExternalStorageDirectory()</code> 返回 <code class="notranslate">/storage/emulated/0/</code>，确保 SD 卡已挂载。</li>
+</ul>
+<h3>3.4 常见编译错误速查表</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>错误信息</th>
+<th>原因</th>
+<th>解决方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="notranslate">NoSuchAlgorithmException: TLSv1.2</code></td>
+<td>系统不支持 TLS 1.2</td>
+<td>引入 Conscrypt，使用 <code class="notranslate">"TLSv1.2", "Conscrypt"</code></td>
+</tr>
+<tr>
+<td><code class="notranslate">Trust anchor for certification path not found</code></td>
+<td>证书库过旧</td>
+<td>测试环境使用空 TrustManager；生产环境使用证书锁定</td>
+</tr>
+<tr>
+<td><code class="notranslate">local variable xxx is accessed from within inner class; needs to be declared final</code></td>
+<td>内部类访问非 final 局部变量</td>
+<td>添加 <code class="notranslate">final</code> 修饰符</td>
+</tr>
+<tr>
+<td><code class="notranslate">Have not classes.dex in package</code></td>
+<td>ADB 安装路径含空格</td>
+<td>用双引号包裹完整路径</td>
+</tr>
+<tr>
+<td><code class="notranslate">UnsupportedEncodingException</code>（编译时）</td>
+<td>未捕获 <code class="notranslate">URLEncoder.encode</code> 异常</td>
+<td>添加 <code class="notranslate">catch (UnsupportedEncodingException e)</code></td>
+</tr>
+<tr>
+<td><code class="notranslate">NoClassDefFoundError: org.conscrypt.Conscrypt</code></td>
+<td>ProGuard 混淆移除了 Conscrypt 类</td>
+<td>在 <code class="notranslate">proguard-rules.pro</code> 中添加 <code class="notranslate">-keep class org.conscrypt.** { *; }</code></td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h2>四、最终成果</h2>
+<p>经过上述十个阶段的迭代，最终实现了：</p>
+<ul>
+<li><strong>网络层</strong>：TLS 1.2 支持 + 证书绕过（测试），API 请求成功率 100%。</li>
+<li><strong>UI 层</strong>：11×11 全屏阅读，长按分区操作，章节选择列表。</li>
+<li><strong>缓存层</strong>：章节内容滑动窗口（3 章） + 目录独立缓存，响应速度 &lt; 200ms。</li>
+<li><strong>日志层</strong>：自动清理，仅保留当日日志，存储占用可控。</li>
+<li><strong>构建层</strong>：GitHub Actions 自动化构建，JDK 8 + Gradle 4.10.1。</li>
+</ul>
+<hr>
+<h2>五、未来改进方向</h2>
+<ol>
+<li><strong>证书锁定</strong>：替换空 TrustManager，实现正式环境的安全通信。</li>
+<li><strong>预加载机制</strong>：后台预加载后续章节，提升翻章体验。</li>
+<li><strong>字体自定义</strong>：允许用户调整网格大小和字体。</li>
+<li><strong>书籍搜索</strong>：调用 <code class="notranslate">type=1</code> 接口实现在线搜索。</li>
+<li><strong>夜间模式</strong>：根据环境光自动切换黑白配色。</li>
+</ol>
+<hr>
+<p><em>该文章由 AI 总结生成，基于真实开发过程中的代码提交、构建日志和问题追踪记录。</em></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://yingo-server.github.io/Never">不能存在的一日</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if("06/30/2026"!=""){
+    var startSite=new Date("06/30/2026");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","yingo-server/Never");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+<script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+
+</html>
