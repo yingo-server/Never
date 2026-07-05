@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="http:/q.qlogo.cn/headimg_dl?dst_uin=3449776312&spec=640&img_type=jpg"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="
+
+# 从零搭建属于自己的网页版 QQ：NapCatQQ + Stapxs QQ Lite 完全部署指南
+
+## 引言：为什么要自己搭建网页版 QQ？
+
+在即时通讯工具层出不穷的今天，QQ 依然是我们日常生活中不可或缺的一部分。">
+<meta property="og:title" content="从零搭建属于自己的网页版 QQ">
+<meta property="og:description" content="
+
+# 从零搭建属于自己的网页版 QQ：NapCatQQ + Stapxs QQ Lite 完全部署指南
+
+## 引言：为什么要自己搭建网页版 QQ？
+
+在即时通讯工具层出不穷的今天，QQ 依然是我们日常生活中不可或缺的一部分。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://yingo-server.github.io/Never/post/cong-ling-da-jian-shu-yu-zi-ji-de-wang-ye-ban-%20QQ.html">
+<meta property="og:image" content="http:/q.qlogo.cn/headimg_dl?dst_uin=3449776312&spec=640&img_type=jpg">
+<title>从零搭建属于自己的网页版 QQ</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">从零搭建属于自己的网页版 QQ</h1>
+<div class="title-right">
+    <a href="https://yingo-server.github.io/Never" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/yingo-server/Never/issues/3" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>从零搭建属于自己的网页版 QQ：NapCatQQ + Stapxs QQ Lite 完全部署指南</h1>
+<h2>引言：为什么要自己搭建网页版 QQ？</h2>
+<p>在即时通讯工具层出不穷的今天，QQ 依然是我们日常生活中不可或缺的一部分。然而，官方 QQ 客户端功能臃肿、资源占用高，而 Web 版 QQ 早已停止维护。对于开发者、社群管理者或者单纯想要一个轻量级 QQ 客户端的用户来说，自己搭建一个网页版 QQ 成了一种极具吸引力的选择。</p>
+<p>本文将带你从零开始，在 Linux 服务器上部署一套完整的网页版 QQ 系统。这套系统的核心由两个开源项目构成：</p>
+<ul>
+<li><strong>NapCatQQ</strong>：基于 NTQQ 的 OneBot v11 协议实现，负责与 QQ 服务器通信，提供 HTTP 和 WebSocket 接口。简单来说，NapCatQQ 是这套系统的“消息引擎”。</li>
+<li><strong>Stapxs QQ Lite</strong>：一个兼容 OneBot 协议的非官方 QQ Web 客户端，基于 Vue 构建。它是这套系统的“用户界面”，让你在浏览器中就能收发 QQ 消息。</li>
+</ul>
+<p>通过本文，你将学会在 2 核 2GB 的 Linux 服务器上完成 NapCatQQ 的安装、配置和开机自启，部署 Stapxs QQ Lite 前端，并通过 WebSocket 将两者连接起来。更值得一提的是，我们还会深入探讨如何为这套系统配置 HTTPS/WSS 加密，确保通信安全——这部分内容将作为专门的扩展章节，满足你对安全性的更高追求。</p>
+<hr>
+<h2>第一章：准备工作</h2>
+<h3>1.1 硬件与系统要求</h3>
+<p>根据 NapCatQQ 的官方文档，Linux 部署支持 NodeLoader、AppImage 和 Docker 三种主要方式。本文采用最推荐的 <strong>NodeLoader 原生部署方案</strong>，以下是最低系统要求：</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>项目</th>
+<th>最低要求</th>
+<th>推荐配置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU</td>
+<td>1 核</td>
+<td>2 核</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>1 GB</td>
+<td>2 GB 或以上</td>
+</tr>
+<tr>
+<td>硬盘</td>
+<td>20 GB</td>
+<td>40 GB SSD</td>
+</tr>
+<tr>
+<td>系统</td>
+<td>Ubuntu 20.04+ / Debian 10+ / CentOS 9</td>
+<td>Ubuntu 22.04 LTS</td>
+</tr>
+<tr>
+<td>网络</td>
+<td>公网 IP</td>
+<td>公网 IP + 域名（推荐）</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>特别说明</strong>：NapCatQQ 设计为在无图形界面的服务器上运行，通过 headless NTQQ 架构绕过 GUI 需求。如果你的服务器是 2 核 2GB 配置，完全足够运行本文所述的全部服务。</p>
+<h3>1.2 软件依赖</h3>
+<p>在开始安装之前，需要确保系统已安装以下软件：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> Ubuntu/Debian 系统</span>
+sudo apt update
+sudo apt install -y curl wget git xvfb screen
+
+<span class="pl-c"><span class="pl-c">#</span> 安装 Node.js 18.x（NapCatQQ 要求 Node.js 18+）</span>
+curl -fsSL https://deb.nodesource.com/setup_18.x <span class="pl-k">|</span> sudo -E bash -
+sudo apt install -y nodejs</pre></div>
+<p><strong>各依赖的作用</strong>：</p>
+<ul>
+<li><strong>xvfb</strong>（X Virtual Framebuffer）：为无图形界面的服务器提供虚拟显示环境，让 QQ 客户端能够“无头”运行。</li>
+<li><strong>screen</strong>：用于在后台保持 NapCatQQ 进程运行，即使关闭 SSH 连接也不会中断。</li>
+<li><strong>Node.js 18+</strong>：NapCatQQ 运行所需的 JavaScript 运行时环境。</li>
+</ul>
+<h3>1.3 域名与端口规划（可选但推荐）</h3>
+<p>虽然可以使用 IP 地址直接访问，但使用域名能让你更方便地配置 HTTPS 证书，也更容易记忆。</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>服务</th>
+<th>端口</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NapCatQQ WebUI</td>
+<td>6099</td>
+<td>管理面板，建议配置 HTTPS</td>
+</tr>
+<tr>
+<td>NapCatQQ WebSocket</td>
+<td>3001</td>
+<td>与前端通信的 WebSocket 服务</td>
+</tr>
+<tr>
+<td>Nginx 代理（可选）</td>
+<td>3003</td>
+<td>用于 WSS 反向代理</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p>如果你有域名，建议提前将其解析到服务器的公网 IP。如果没有域名，后续可以使用 IP 地址访问，但 HTTPS 配置会稍微复杂一些。</p>
+<hr>
+<h2>第二章：NapCatQQ 部署</h2>
+<p>NapCatQQ 提供了多种 Linux 部署方式。本文采用<strong>一键脚本安装（Rootless 模式）</strong>，这种方式安装快捷、配置清晰，且以普通用户身份运行，安全性更高。</p>
+<h3>2.1 创建普通用户并切换</h3>
+<p><strong>不要使用 root 用户运行 NapCatQQ</strong>。建议创建一个专用用户（如 <code class="notranslate">admin</code>）：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 如果还没有 admin 用户</span>
+sudo useradd -m -s /bin/bash admin
+sudo passwd admin
+
+<span class="pl-c"><span class="pl-c">#</span> 切换到 admin 用户</span>
+su - admin
+whoami  <span class="pl-c"><span class="pl-c">#</span> 应输出 admin</span></pre></div>
+<h3>2.2 执行一键安装脚本</h3>
+<p><strong>关键</strong>：以普通用户身份执行脚本，<strong>不要加 sudo</strong>。脚本会在需要时自动请求管理员权限。</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">curl -o napcat.sh https://nclatest.znin.net/NapNeko/NapCat-Installer/main/script/install.sh <span class="pl-k">&amp;&amp;</span> bash napcat.sh</pre></div>
+<p>安装过程中，脚本会提示你进行选择：</p>
+<ul>
+<li>是否使用 Shell 安装？选择 <code class="notranslate">y</code></li>
+<li>是否配置管理工具？选择 <code class="notranslate">y</code>（推荐）</li>
+</ul>
+<p>安装完成后，你会看到类似以下的输出：</p>
+<pre class="notranslate"><code class="notranslate">[2026-07-05 16:00:31]: - Shell (Rootless) 安装完成 -
+[2026-07-05 16:00:31]: 安装位置: /home/admin/Napcat
+[2026-07-05 16:00:31]: 启动 Napcat (无需 sudo):
+[2026-07-05 16:00:31]:   xvfb-run -a /home/admin/Napcat/opt/QQ/qq --no-sandbox
+</code></pre>
+<p><strong>重要信息</strong>：</p>
+<ul>
+<li><strong>NapCatQQ 主目录</strong>：<code class="notranslate">/home/admin/Napcat/opt/QQ/resources/app/app_launcher/napcat</code></li>
+<li><strong>配置文件目录</strong>：<code class="notranslate">/home/admin/Napcat/opt/QQ/resources/app/app_launcher/napcat/config/</code></li>
+<li><strong>qq 命令路径</strong>：<code class="notranslate">/home/admin/Napcat/opt/QQ/qq</code></li>
+</ul>
+<hr>
+<h2>第三章：WebUI 配置（三种方法）</h2>
+<p>NapCatQQ 的 WebUI 是一个基于 Express 的 Web 管理界面，用于管理账号、配置网络服务和查看日志。以下是三种配置 WebUI 的方法，按推荐程度排序。</p>
+<h3>3.1 方法一：通过 napcat 命令配置（最推荐）</h3>
+<p>NapCatQQ 安装后自带 <code class="notranslate">napcat</code> 命令行工具，这是最直观、最不容易出错的配置方式。</p>
+<p><strong>第一步：进入 napcat 管理界面</strong></p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">napcat</pre></div>
+<p>你会看到一个交互式菜单，选择 <strong>“配置”</strong> 或 <strong>“Config”</strong> 选项。</p>
+<p><strong>第二步：选择 WebUI 配置</strong></p>
+<p>在配置菜单中，选择 <strong>“WebUI”</strong> 相关选项，进入 WebUI 配置界面。</p>
+<p><strong>第三步：填写配置信息</strong></p>
+<p>根据提示依次填写以下信息：</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>配置项</th>
+<th>推荐值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Host</td>
+<td><code class="notranslate">0.0.0.0</code></td>
+<td>监听所有网络接口</td>
+</tr>
+<tr>
+<td>Port</td>
+<td><code class="notranslate">6099</code></td>
+<td>WebUI 访问端口</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>自定义强密码</td>
+<td><strong>必须 13 位以上</strong>，包含字母和数字</td>
+</tr>
+<tr>
+<td>Login Rate</td>
+<td><code class="notranslate">20</code></td>
+<td>每小时最大登录尝试次数</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<blockquote>
+<p><strong>安全提示</strong>：Token 务必设置一个强密码，不要使用默认值。这是 WebUI 的唯一登录凭证。</p>
+</blockquote>
+<p><strong>第四步：配置 WebSocket 服务端</strong></p>
+<p>回到主菜单，选择 <strong>“网络配置”</strong> → <strong>“新建”</strong> → <strong>“WebSocket 服务端”</strong>，填写：</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>配置项</th>
+<th>推荐值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>名称</td>
+<td><code class="notranslate">ws-server</code></td>
+<td>自定义标识</td>
+</tr>
+<tr>
+<td>Host</td>
+<td><code class="notranslate">0.0.0.0</code></td>
+<td>监听所有网络接口</td>
+</tr>
+<tr>
+<td>Port</td>
+<td><code class="notranslate">3001</code></td>
+<td>WebSocket 服务端口</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>可与 WebUI Token 相同或不同</td>
+<td>前端连接认证</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>第五步：保存并退出</strong></p>
+<p>按提示保存配置，然后选择 <strong>“重启 NapCat”</strong> 使配置生效。</p>
+<p><strong>第六步：扫码登录</strong></p>
+<p>重启后，终端会显示一个二维码。用手机 QQ 扫描二维码即可完成登录。</p>
+<hr>
+<h3>3.2 方法二：通过 napcat 命令快速配置（备选）</h3>
+<p>如果你熟悉命令行操作，可以使用 <code class="notranslate">napcat</code> 命令的子命令快速配置：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 进入 napcat 管理界面</span>
+napcat
+
+<span class="pl-c"><span class="pl-c">#</span> 选择 "启动" → 新建用户 → 输入 QQ 号</span>
+<span class="pl-c"><span class="pl-c">#</span> 选择 "配置" → 进入 WebUI 配置</span></pre></div>
+<p>操作流程简述：</p>
+<ol>
+<li>输入 <code class="notranslate">napcat</code> 进入管理界面</li>
+<li>选择 <strong>“启动”</strong>，然后 <strong>“新建用户”</strong>，输入你的 QQ 号</li>
+<li>选择 <strong>“配置”</strong>，进入 WebUI 配置页面</li>
+<li>依次设置 Host、Port、Token（13 位以上）、Login Rate</li>
+<li>返回主菜单，选择 <strong>“网络配置”</strong>，添加 WebSocket 服务端</li>
+<li>保存后 <strong>“停止”</strong> 再 <strong>“启动”</strong> NapCatQQ</li>
+<li>终端显示二维码，手机 QQ 扫码登录</li>
+</ol>
+<p>这种方式的优点是所有配置都在一个界面中完成，不需要手动编辑文件。</p>
+<hr>
+<h3>3.3 方法三：手动编辑配置文件（高级）</h3>
+<p>如果你更喜欢直接编辑配置文件，或者需要通过脚本自动化部署，可以手动创建 <code class="notranslate">webui.json</code> 文件。</p>
+<p><strong>第一步：进入配置目录</strong></p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c1">cd</span> /home/admin/Napcat/opt/QQ/resources/app/app_launcher/napcat/config/</pre></div>
+<p><strong>第二步：创建 webui.json</strong></p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">nano webui.json</pre></div>
+<p>写入以下内容（将 <code class="notranslate">your_secure_token</code> 替换为你的强密码，<strong>必须 13 位以上</strong>）：</p>
+<div class="highlight highlight-source-json"><pre class="notranslate">{
+  <span class="pl-ent">"host"</span>: <span class="pl-s"><span class="pl-pds">"</span>0.0.0.0<span class="pl-pds">"</span></span>,
+  <span class="pl-ent">"port"</span>: <span class="pl-c1">6099</span>,
+  <span class="pl-ent">"token"</span>: <span class="pl-s"><span class="pl-pds">"</span>your_secure_token<span class="pl-pds">"</span></span>,
+  <span class="pl-ent">"loginRate"</span>: <span class="pl-c1">10</span>
+}</pre></div>
+<blockquote>
+<p><strong>注意</strong>：确保使用英文字符和标点。保存时按 <code class="notranslate">Ctrl+X</code>，输入 <code class="notranslate">y</code>，然后回车。</p>
+</blockquote>
+<p><strong>第三步：配置 WebSocket 服务端（可选）</strong></p>
+<p>如果通过 WebUI 配置 WebSocket 服务端更方便，你也可以在 <code class="notranslate">config</code> 目录下找到账号相关的配置文件（如 <code class="notranslate">protocol_你的QQ号.json</code>）进行手动配置，但更推荐通过 WebUI 完成这一步。</p>
+<p><strong>第四步：重启 NapCatQQ</strong></p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 如果使用 systemd</span>
+sudo systemctl restart napcat.service
+
+<span class="pl-c"><span class="pl-c">#</span> 或使用 screen</span>
+screen -r napcat
+<span class="pl-c"><span class="pl-c">#</span> 按 Ctrl+C 停止，然后重新启动</span>
+xvfb-run -a /home/admin/Napcat/opt/QQ/qq --no-sandbox</pre></div>
+<p><strong>第五步：验证配置</strong></p>
+<p>访问 <code class="notranslate">http://你的服务器IP:6099/webui</code>，输入你设置的 token，应该能成功登录。</p>
+<hr>
+<h3>3.4 配置项完整说明</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+<th>推荐值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="notranslate">host</code></td>
+<td>监听地址，<code class="notranslate">0.0.0.0</code> 表示监听所有网络接口</td>
+<td><code class="notranslate">"0.0.0.0"</code></td>
+</tr>
+<tr>
+<td><code class="notranslate">port</code></td>
+<td>WebUI 端口</td>
+<td><code class="notranslate">6099</code></td>
+</tr>
+<tr>
+<td><code class="notranslate">token</code></td>
+<td>登录密码，<strong>至少 13 位且包含字母和数字</strong></td>
+<td>自定义强密码</td>
+</tr>
+<tr>
+<td><code class="notranslate">loginRate</code></td>
+<td>每小时最大登录尝试次数</td>
+<td><code class="notranslate">10</code></td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>安全提示</strong>：如果你的服务器暴露在公网，<strong>务必修改默认 token</strong>。在 v4.8.106 以下版本中，NapCat WebUI 默认使用弱密码（密钥为 <code class="notranslate">napcat</code>），存在严重安全风险。</p>
+<hr>
+<h2>第四章：后台运行与开机自启</h2>
+<h3>4.1 使用 systemd（推荐）</h3>
+<p>创建服务文件：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">sudo nano /etc/systemd/system/napcat.service</pre></div>
+<p>写入以下内容（注意 <code class="notranslate">User</code> 和 <code class="notranslate">Group</code> 应设置为你的普通用户名）：</p>
+<div class="highlight highlight-source-ini"><pre class="notranslate"><span class="pl-en">[Unit]</span>
+<span class="pl-k">Description</span>=NapCatQQ Service
+<span class="pl-k">After</span>=network.target
+
+<span class="pl-en">[Service]</span>
+<span class="pl-k">Type</span>=simple
+<span class="pl-k">User</span>=admin
+<span class="pl-k">Group</span>=admin
+<span class="pl-k">ExecStart</span>=/usr/bin/xvfb-run -a /home/admin/Napcat/opt/QQ/qq --no-sandbox
+<span class="pl-k">Restart</span>=always
+<span class="pl-k">RestartSec</span>=10
+
+<span class="pl-en">[Install]</span>
+<span class="pl-k">WantedBy</span>=multi-user.target</pre></div>
+<p>启用并启动服务：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">sudo systemctl daemon-reload
+sudo systemctl <span class="pl-c1">enable</span> napcat.service
+sudo systemctl start napcat.service
+sudo systemctl status napcat.service</pre></div>
+<h3>4.2 使用 screen（备选）</h3>
+<p>如果你更喜欢使用 <code class="notranslate">screen</code> 来管理进程：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 后台启动</span>
+screen -dmS napcat bash -c <span class="pl-s"><span class="pl-pds">"</span>xvfb-run -a /home/admin/Napcat/opt/QQ/qq --no-sandbox<span class="pl-pds">"</span></span>
+
+<span class="pl-c"><span class="pl-c">#</span> 附加到会话查看</span>
+screen -r napcat
+
+<span class="pl-c"><span class="pl-c">#</span> 分离会话（保持后台运行）</span>
+<span class="pl-c"><span class="pl-c">#</span> 按 Ctrl+A 然后按 D</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 停止会话</span>
+screen -S napcat -X quit</pre></div>
+<h3>4.3 验证 NapCatQQ 是否正常运行</h3>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 检查服务状态（systemd 方式）</span>
+sudo systemctl status napcat.service
+
+<span class="pl-c"><span class="pl-c">#</span> 或检查进程（screen 方式）</span>
+ps aux <span class="pl-k">|</span> grep qq
+
+<span class="pl-c"><span class="pl-c">#</span> 检查端口监听</span>
+sudo netstat -tlnp <span class="pl-k">|</span> grep -E <span class="pl-s"><span class="pl-pds">"</span>6099|3001<span class="pl-pds">"</span></span></pre></div>
+<p>你应该看到 <code class="notranslate">6099</code>（WebUI）和 <code class="notranslate">3001</code>（WebSocket）端口正在监听。</p>
+<hr>
+<h2>第五章：Stapxs QQ Lite 部署</h2>
+<p>Stapxs QQ Lite 是一个基于 Vue 的单页应用，可以部署在任何 Web 服务器或静态托管服务上。</p>
+<h3>5.1 获取部署文件</h3>
+<p><strong>方式一：下载预构建包（推荐）</strong></p>
+<p>访问 <a href="https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/releases">Stapxs QQ Lite 2.0 Releases 页面</a>，下载 <code class="notranslate">Stapxs.QQ.Lite-&lt;版本&gt;-web.zip</code> 文件。</p>
+<p><strong>方式二：从源码构建</strong></p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git clone https://github.com/Stapxs/Stapxs-QQ-Lite-2.0.git --recursive
+<span class="pl-c1">cd</span> Stapxs-QQ-Lite-2.0
+yarn install
+yarn build</pre></div>
+<p>构建产物在 <code class="notranslate">dist</code> 目录中。</p>
+<blockquote>
+<p><strong>注意</strong>：如果你的网站不在根域名下运行（例如 <code class="notranslate">https://example.com/qq/</code>），需要在构建前修改 <code class="notranslate">vue.config.js</code> 中的 <code class="notranslate">publicPath</code> 字段。</p>
+</blockquote>
+<h3>5.2 部署到 Netlify（推荐）</h3>
+<p>Netlify 是最简单的静态托管平台，支持拖拽部署和自动 HTTPS。</p>
+<ol>
+<li>登录 <a href="https://app.netlify.com" rel="nofollow">Netlify</a></li>
+<li>将下载的 <code class="notranslate">web.zip</code> 文件直接拖拽到部署区域</li>
+<li>Netlify 会自动解压并生成一个公网访问地址（如 <code class="notranslate">https://你的项目名.netlify.app</code>）</li>
+</ol>
+<p><strong>或者</strong>，你也可以通过 GitHub 仓库连接实现自动部署。</p>
+<h3>5.3 部署到自己的 Web 服务器（Nginx）</h3>
+<p>如果你有自己的 Web 服务器，也可以将 Stapxs 部署到 Nginx 中：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 解压部署文件到 Nginx 目录</span>
+sudo unzip Stapxs.QQ.Lite-<span class="pl-k">*</span>.web.zip -d /var/www/stapxs/
+
+<span class="pl-c"><span class="pl-c">#</span> 配置 Nginx 站点</span>
+sudo nano /etc/nginx/sites-available/stapxs</pre></div>
+<p>Nginx 配置示例：</p>
+<div class="highlight highlight-source-nginx"><pre class="notranslate"><span class="pl-c1">server</span> <span class="pl-c1">{</span>
+    <span class="pl-c1">listen</span> <span class="pl-c1">80</span><span class="pl-c1">;</span>
+    <span class="pl-c1">server_name</span> your-domain.com<span class="pl-c1">;</span>
+
+    <span class="pl-c1">root</span> /var/www/stapxs<span class="pl-c1">;</span>
+    <span class="pl-c1">index</span> <span class="pl-c1">index</span>.html<span class="pl-c1">;</span>
+
+    <span class="pl-c1">location</span> / <span class="pl-c1">{</span>
+        <span class="pl-c1">try_files</span> <span class="pl-v">$uri</span> <span class="pl-v">$uri</span>/ /<span class="pl-c1">index</span>.html<span class="pl-c1">;</span>
+    <span class="pl-c1">}</span>
+<span class="pl-c1">}</span></pre></div>
+<p>启用站点并重启 Nginx：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">sudo ln -s /etc/nginx/sites-available/stapxs /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx</pre></div>
+<hr>
+<h2>第六章：连接 NapCatQQ 与 Stapxs QQ Lite</h2>
+<p>NapCatQQ 与 Stapxs QQ Lite 之间通过 <strong>WebSocket</strong> 协议通信。NapCatQQ 作为 WebSocket 服务端（正向 WS），Stapxs 作为客户端主动连接。</p>
+<h3>6.1 确认 NapCatQQ WebSocket 服务端配置</h3>
+<ol>
+<li>访问 NapCatQQ WebUI：<code class="notranslate">http://你的服务器IP:6099/webui</code></li>
+<li>输入你在 <code class="notranslate">webui.json</code> 中设置的 token 登录</li>
+<li>进入左侧菜单的 <strong>“网络配置”</strong></li>
+<li>确认存在一个 <strong>“WebSocket 服务端”</strong> 配置，且状态为 <strong>“启用”</strong></li>
+<li>确认端口为 <code class="notranslate">3001</code>，Host 为 <code class="notranslate">0.0.0.0</code></li>
+</ol>
+<p>如果不存在，点击 <strong>“新建”</strong> 添加一个。</p>
+<h3>6.2 在 Stapxs 中配置连接</h3>
+<ol>
+<li>访问你部署的 Stapxs QQ Lite 页面</li>
+<li>进入设置页面</li>
+<li>填写连接信息：</li>
+</ol>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>WebSocket 地址</strong></td>
+<td><code class="notranslate">ws://你的服务器IP:3001</code></td>
+</tr>
+<tr>
+<td><strong>Token</strong></td>
+<td>你在 webui.json 中设置的 token</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<ol start="4">
+<li>保存配置，页面应自动连接并显示 QQ 好友和群聊列表。</li>
+</ol>
+<h3>6.3 协议匹配问题（重要）</h3>
+<p>如果 Stapxs 页面是通过 <code class="notranslate">https://</code> 访问的，那么 WebSocket 地址<strong>必须</strong>使用 <code class="notranslate">wss://</code>（加密 WebSocket），否则浏览器会因为混合内容安全策略而阻止连接。</p>
+<p>如果你的 Stapxs 页面是 <code class="notranslate">http://</code>，则可以使用 <code class="notranslate">ws://</code>。</p>
+<hr>
+<h2>第七章：扩展篇 —— 为 NapCatQQ 配置 HTTPS/WSS</h2>
+<p><strong>本章为扩展内容</strong>，适合希望进一步提升系统安全性的用户。如果你仅在内网使用或对安全性要求不高，可以跳过本章。</p>
+<h3>7.1 为什么需要 HTTPS/WSS？</h3>
+<ul>
+<li><strong>数据加密</strong>：防止通信内容被中间人窃听或篡改</li>
+<li><strong>浏览器安全策略</strong>：HTTPS 页面必须使用 WSS 连接 WebSocket</li>
+<li><strong>提升信任度</strong>：浏览器地址栏显示安全锁标志</li>
+</ul>
+<h3>7.2 NapCatQQ 原生 SSL 支持（v4.14.1+）</h3>
+<p>从 NapCatQQ v4.14.1 版本开始，WebUI 原生支持 SSL 证书管理。</p>
+<p><strong>方法一：通过 WebUI 上传证书</strong></p>
+<p>在 WebUI 的设置页面中，找到 <strong>“SSL 证书管理”</strong> 选项，分别上传 <code class="notranslate">cert.pem</code>（证书）和 <code class="notranslate">key.pem</code>（私钥）文件。</p>
+<p><strong>方法二：直接放置证书文件</strong></p>
+<p>将 <code class="notranslate">cert.pem</code> 和 <code class="notranslate">key.pem</code> 文件放入 NapCatQQ 的 <code class="notranslate">config</code> 目录：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">cp /path/to/cert.pem /home/admin/Napcat/opt/QQ/resources/app/app_launcher/napcat/config/
+cp /path/to/key.pem /home/admin/Napcat/opt/QQ/resources/app/app_launcher/napcat/config/</pre></div>
+<p><strong>修改 webui.json 启用 SSL</strong>：</p>
+<div class="highlight highlight-source-json"><pre class="notranslate">{
+  <span class="pl-ent">"host"</span>: <span class="pl-s"><span class="pl-pds">"</span>0.0.0.0<span class="pl-pds">"</span></span>,
+  <span class="pl-ent">"port"</span>: <span class="pl-c1">6099</span>,
+  <span class="pl-ent">"token"</span>: <span class="pl-s"><span class="pl-pds">"</span>your_token<span class="pl-pds">"</span></span>,
+  <span class="pl-ent">"loginRate"</span>: <span class="pl-c1">10</span>,
+  <span class="pl-ent">"ssl"</span>: <span class="pl-c1">true</span>
+}</pre></div>
+<p>重启 NapCatQQ 后，即可通过 <code class="notranslate">https://你的服务器IP:6099/webui</code> 访问 WebUI。</p>
+<h3>7.3 使用 Nginx 反向代理实现 WSS（推荐方案）</h3>
+<p>如果 NapCatQQ 原生 SSL 配置遇到困难，使用 Nginx 反向代理是更灵活、更稳定的选择。</p>
+<p><strong>整体架构</strong>：</p>
+<pre class="notranslate"><code class="notranslate">浏览器 (wss://) → Nginx (端口 3003, SSL) → NapCatQQ (ws://127.0.0.1:3001)
+</code></pre>
+<h4>7.3.1 安装 Nginx</h4>
+<div class="highlight highlight-source-shell"><pre class="notranslate">sudo apt update
+sudo apt install nginx -y</pre></div>
+<h4>7.3.2 准备 SSL 证书</h4>
+<p>你可以使用 Let's Encrypt 免费申请证书，或使用已有的证书文件。</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 将证书复制到 Nginx 目录</span>
+sudo mkdir -p /etc/nginx/ssl
+sudo cp /path/to/cert.pem /etc/nginx/ssl/server.crt
+sudo cp /path/to/key.pem /etc/nginx/ssl/server.key
+sudo chmod 644 /etc/nginx/ssl/server.crt
+sudo chmod 600 /etc/nginx/ssl/server.key</pre></div>
+<h4>7.3.3 配置 Nginx</h4>
+<p>创建 Nginx 配置文件：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">sudo nano /etc/nginx/sites-available/napcat-wss</pre></div>
+<p>写入以下配置（将 <code class="notranslate">server.344977.xyz</code> 替换为你的实际域名或 IP）：</p>
+<div class="highlight highlight-source-nginx"><pre class="notranslate"><span class="pl-c1">server</span> <span class="pl-c1">{</span>
+    <span class="pl-c1">listen</span> <span class="pl-c1">3003</span> <span class="pl-c1">ssl</span><span class="pl-c1">;</span>
+    <span class="pl-c1">server_name</span> <span class="pl-c1">server</span>.<span class="pl-c1">344977</span>.xyz<span class="pl-c1">;</span>
+
+    <span class="pl-c1">ssl_certificate</span>      /etc/nginx/<span class="pl-c1">ssl</span>/<span class="pl-c1">server</span>.crt<span class="pl-c1">;</span>
+    <span class="pl-c1">ssl_certificate_key</span>  /etc/nginx/<span class="pl-c1">ssl</span>/<span class="pl-c1">server</span>.key<span class="pl-c1">;</span>
+    <span class="pl-c1">ssl_session_cache</span>    shared:SSL:<span class="pl-c1">1m</span><span class="pl-c1">;</span>
+    <span class="pl-c1">ssl_session_timeout</span>  <span class="pl-c1">5m</span><span class="pl-c1">;</span>
+    <span class="pl-c1">ssl_ciphers</span>  HIGH:!aNULL:!MD5<span class="pl-c1">;</span>
+    <span class="pl-c1">ssl_prefer_server_ciphers</span>  on<span class="pl-c1">;</span>
+
+    <span class="pl-c1">location</span> /ws/ <span class="pl-c1">{</span>
+        <span class="pl-c1">proxy_pass</span> <span class="pl-c1">http</span>://<span class="pl-c1">127.0.0.1:3001</span>/<span class="pl-c1">;</span>
+        <span class="pl-c1">proxy_http_version</span> 1.1<span class="pl-c1">;</span>
+        <span class="pl-c1">proxy_set_header</span> Upgrade <span class="pl-v">$http_upgrade</span><span class="pl-c1">;</span>
+        <span class="pl-c1">proxy_set_header</span> Connection <span class="pl-s">"Upgrade"</span><span class="pl-c1">;</span>
+        <span class="pl-c1">proxy_set_header</span> Host <span class="pl-v">$host</span><span class="pl-c1">;</span>
+        <span class="pl-c1">proxy_set_header</span> X-Real-IP <span class="pl-v">$remote_addr</span><span class="pl-c1">;</span>
+        <span class="pl-c1">proxy_set_header</span> X-Forwarded-For <span class="pl-v">$proxy_add_x_forwarded_for</span><span class="pl-c1">;</span>
+        <span class="pl-c1">proxy_read_timeout</span> <span class="pl-c1">86400</span><span class="pl-c1">;</span>
+
+<span class="pl-c">        # 跨域配置</span>
+        <span class="pl-c1">add_header</span> Access-Control-Allow-Origin *<span class="pl-c1">;</span>
+        <span class="pl-c1">add_header</span> Access-Control-Allow-Methods <span class="pl-s">"GET, POST, OPTIONS"</span><span class="pl-c1">;</span>
+        <span class="pl-c1">add_header</span> Access-Control-Allow-Headers <span class="pl-s">"Origin, X-Requested-With, Content-Type, Accept"</span><span class="pl-c1">;</span>
+    <span class="pl-c1">}</span>
+<span class="pl-c1">}</span></pre></div>
+<p><strong>关键配置说明</strong>：</p>
+<ul>
+<li><code class="notranslate">proxy_http_version 1.1;</code> 和 <code class="notranslate">Upgrade</code> / <code class="notranslate">Connection</code> 头是 WebSocket 代理的必备条件</li>
+<li><code class="notranslate">proxy_read_timeout 86400;</code> 防止 WebSocket 长连接因超时被断开</li>
+<li><code class="notranslate">Access-Control-Allow-Origin *</code> 解决浏览器的跨域问题</li>
+</ul>
+<h4>7.3.4 启用配置并重启 Nginx</h4>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 禁用可能冲突的默认站点</span>
+sudo rm /etc/nginx/sites-enabled/default
+
+<span class="pl-c"><span class="pl-c">#</span> 启用 napcat-wss 站点</span>
+sudo ln -s /etc/nginx/sites-available/napcat-wss /etc/nginx/sites-enabled/
+
+<span class="pl-c"><span class="pl-c">#</span> 测试配置并重启</span>
+sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl status nginx</pre></div>
+<h4>7.3.5 放行防火墙端口</h4>
+<p><strong>阿里云安全组</strong>：添加入方向规则，放行 TCP 端口 <code class="notranslate">3003</code>。</p>
+<p><strong>服务器内部防火墙</strong>：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> Ubuntu (ufw)</span>
+sudo ufw allow 3003/tcp
+sudo ufw reload</pre></div>
+<h4>7.3.6 测试 WSS 连接</h4>
+<div class="highlight highlight-source-shell"><pre class="notranslate">curl -v -k -H <span class="pl-s"><span class="pl-pds">"</span>Upgrade: websocket<span class="pl-pds">"</span></span> https://你的域名:3003/ws/</pre></div>
+<p>如果返回 <code class="notranslate">101 Switching Protocols</code>，说明 WSS 代理配置成功。</p>
+<h4>7.3.7 更新 Stapxs 连接地址</h4>
+<p>在 Stapxs QQ Lite 设置中，将 WebSocket 地址改为：</p>
+<pre class="notranslate"><code class="notranslate">wss://你的域名:3003/ws/
+</code></pre>
+<p>Token 保持不变。</p>
+<h3>7.4 常见 HTTPS/WSS 问题排查</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>问题现象</th>
+<th>可能原因</th>
+<th>解决方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="notranslate">ERR_SSL_PROTOCOL_ERROR</code></td>
+<td>用 HTTPS 访问了只支持 HTTP 的服务</td>
+<td>检查是否正确配置了 SSL 证书</td>
+</tr>
+<tr>
+<td><code class="notranslate">wscat: unable to verify the first certificate</code></td>
+<td>自签名证书或证书链不完整</td>
+<td>使用 <code class="notranslate">NODE_TLS_REJECT_UNAUTHORIZED=0</code> 绕过验证（仅测试用）</td>
+</tr>
+<tr>
+<td><code class="notranslate">400 Bad Request</code></td>
+<td>WebSocket 握手缺少必要头或 Token 认证失败</td>
+<td>检查 Nginx 是否正确传递了 <code class="notranslate">Upgrade</code> 和 <code class="notranslate">Authorization</code> 头</td>
+</tr>
+<tr>
+<td>连接成功但无法收发消息</td>
+<td>WebSocket 连接建立但 NapCatQQ 未正确响应</td>
+<td>检查 NapCatQQ 日志，确认 WebSocket 服务端已启用</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h2>第八章：常见问题与故障排除</h2>
+<h3>8.1 NapCatQQ 启动失败</h3>
+<p><strong>问题</strong>：执行 <code class="notranslate">xvfb-run -a ...</code> 后进程立即退出</p>
+<p><strong>排查步骤</strong>：</p>
+<ol>
+<li>检查是否安装了 <code class="notranslate">xvfb</code>：<code class="notranslate">which xvfb-run</code></li>
+<li>查看错误日志：<code class="notranslate">journalctl -u napcat.service -e --no-pager</code>（systemd 方式）</li>
+<li>检查配置文件语法是否正确</li>
+</ol>
+<h3>8.2 WebUI 无法访问</h3>
+<p><strong>问题</strong>：浏览器无法打开 <code class="notranslate">http://服务器IP:6099/webui</code></p>
+<p><strong>排查步骤</strong>：</p>
+<ol>
+<li>检查 NapCatQQ 是否正在运行：<code class="notranslate">ps aux | grep qq</code></li>
+<li>检查端口是否监听：<code class="notranslate">sudo netstat -tlnp | grep 6099</code></li>
+<li>检查阿里云安全组是否放行了 <code class="notranslate">6099</code> 端口</li>
+<li>检查服务器防火墙：<code class="notranslate">sudo ufw status</code></li>
+</ol>
+<h3>8.3 Stapxs 无法连接 NapCatQQ</h3>
+<p><strong>问题</strong>：Stapxs 显示“连接失败”或“WebSocket 错误”</p>
+<p><strong>排查步骤</strong>：</p>
+<ol>
+<li>确认 NapCatQQ 的 WebSocket 服务端已启用（WebUI → 网络配置）</li>
+<li>确认 WebSocket 端口（默认 3001）已放行</li>
+<li>检查协议是否匹配：HTTPS 页面必须用 WSS，HTTP 页面可用 WS</li>
+<li>检查 Token 是否正确</li>
+<li>查看浏览器控制台（F12）的具体错误信息</li>
+</ol>
+<h3>8.4 端口被占用</h3>
+<p><strong>问题</strong>：Nginx 启动失败，错误日志显示 <code class="notranslate">bind() to 0.0.0.0:80 failed (98: Address already in use)</code></p>
+<p><strong>解决方案</strong>：</p>
+<ol>
+<li>检查占用端口的进程：<code class="notranslate">sudo netstat -tlnp | grep :80</code></li>
+<li>停止冲突的服务，或修改 Nginx 的监听端口</li>
+</ol>
+<hr>
+<h2>结语</h2>
+<p>通过本文的完整指南，你已经学会了如何在 Linux 服务器上从零搭建一套完整的网页版 QQ 系统。从 NapCatQQ 的安装配置，到 Stapxs QQ Lite 的前端部署，再到 WebSocket 连接的建立，每一步都经过了详细的讲解。</p>
+<p>更重要的是，我们在扩展章节中深入探讨了 HTTPS/WSS 的配置方案——无论是 NapCatQQ 原生的 SSL 支持，还是通过 Nginx 反向代理实现加密通信，都能让你的系统在安全性上更上一层楼。</p>
+<p>这套系统的优势在于：</p>
+<ul>
+<li><strong>轻量级</strong>：2 核 2GB 的服务器即可流畅运行</li>
+<li><strong>跨平台</strong>：只要有浏览器，随时随地访问你的 QQ</li>
+<li><strong>可扩展</strong>：NapCatQQ 提供了完整的 OneBot API，你可以在此基础上开发机器人、自动化工具等</li>
+</ul>
+<p>当然，也需要提醒几点注意事项：</p>
+<ol>
+<li><strong>账号安全</strong>：建议使用小号测试，避免主号因异常登录被限制</li>
+<li><strong>合规使用</strong>：本文方案仅供学习交流，请勿用于商业或非法用途</li>
+<li><strong>持续维护</strong>：NapCatQQ 和 Stapxs 都在持续更新，建议定期关注项目动态</li>
+</ol>
+<p>希望这篇指南能帮助你顺利搭建属于自己的网页版 QQ。如果在部署过程中遇到任何问题，欢迎查阅项目的官方文档或在社区中寻求帮助。</p>
+<hr>
+<h2>参考资源</h2>
+<ul>
+<li><a href="https://github.com/NapNeko/NapCatQQ">NapCatQQ GitHub 仓库</a></li>
+<li><a href="https://deepwiki.com/NapNeko/NapCatQQ" rel="nofollow">NapCatQQ 官方文档</a></li>
+<li><a href="https://github.com/Stapxs/Stapxs-QQ-Lite-2.0">Stapxs QQ Lite 2.0 GitHub 仓库</a></li>
+<li><a href="https://onebot.dev/" rel="nofollow">OneBot 协议规范</a></li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://yingo-server.github.io/Never">不能存在的一日</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if("06/30/2026"!=""){
+    var startSite=new Date("06/30/2026");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+cmButton=document.getElementById("cmButton");
+    span=document.createElement("span");
+    span.setAttribute("class","Counter");
+    span.innerHTML="1";
+    cmButton.appendChild(span);
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","yingo-server/Never");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+<script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+
+</html>
