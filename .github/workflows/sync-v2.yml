@@ -29,7 +29,7 @@ jobs:
           TARGET_DIR: "content/post"
         run: |
           python << 'EOF'
-          import os, sys, json, yaml, requests, subprocess, shutil
+          import os, sys, json, yaml, requests, subprocess, shutil, re
           from datetime import datetime
           from pathlib import Path
           from pypinyin import lazy_pinyin
@@ -42,6 +42,9 @@ jobs:
 
           API_URL = f"https://api.github.com/repos/{SOURCE_REPO}/issues"
           HEADERS = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
+
+          def clean_body(text):
+              return re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', text)
 
           def get_all_issues():
               issues = []
@@ -58,63 +61,55 @@ jobs:
                   page += 1
               return issues
 
-          def generate_index_md(issue, lang='cn'):
+          def generate_index_md(issue, lang='zh'):  # 默认为中文
               title = issue['title']
-              body = issue['body'] or ''
+              body = clean_body(issue['body'] or '')
               number = issue['number']
               created_at = issue['created_at']
               labels = [label['name'] for label in issue['labels']]
-              tags = [tag for tag in labels if tag != 'about']  # 精确匹配，区分大小写
+              tags = [tag for tag in labels if tag != 'about']
 
               dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
               date_str = dt.strftime('%Y-%m-%dT%H:%M:%S+00:00')
 
-              if lang == 'cn':
-                  front_matter = {
-                      'title': title,
-                      'date': date_str,
-                      'tags': tags,
-                      'draft': False,
-                  }
-                  content = f"---\n{yaml.dump(front_matter, allow_unicode=True, sort_keys=False, default_flow_style=False)}---\n\n{body}"
-                  return content
+              front_matter = {
+                  'title': title,
+                  'date': date_str,
+                  'tags': tags,
+                  'draft': False,
+              }
+              yaml_str = yaml.dump(front_matter, allow_unicode=True, sort_keys=False, default_flow_style=False)
+
+              if lang == 'zh':
+                  content = f"---\n{yaml_str}---\n\n{body}"
               else:  # en
-                  # 标题转为大写拼音
                   title_pinyin = ' '.join(lazy_pinyin(title)).upper()
-                  front_matter = {
-                      'title': title_pinyin,
-                      'date': date_str,
-                      'tags': tags,
-                      'draft': False,
-                  }
-                  # 英文占位内容（HTML样式）
+                  front_matter['title'] = title_pinyin
+                  yaml_str = yaml.dump(front_matter, allow_unicode=True, sort_keys=False, default_flow_style=False)
                   en_body = '''
           <div style="text-align: center; margin-top: 20px;">
               <p style="font-size: 2.5em; font-weight: bold;">Sorry, your language is not supported yet.</p>
               <p style="font-size: 0.8em; color: gray;">对不起，您的语言暂未得到支持。</p>
           </div>
                   '''
-                  content = f"---\n{yaml.dump(front_matter, allow_unicode=True, sort_keys=False, default_flow_style=False)}---\n\n{en_body}"
-                  return content
+                  content = f"---\n{yaml_str}---\n\n{en_body}"
+              return content
 
           print("Fetching all issues...")
           issues = get_all_issues()
           print(f"Found {len(issues)} issues.")
 
-          # 浅克隆目标仓库
           target_url = f"https://{PAT_HUGO}@github.com/{TARGET_REPO}.git"
           repo_dir = Path("target-repo")
           if repo_dir.exists():
               shutil.rmtree(repo_dir)
           subprocess.run(["git", "clone", "--depth=1", target_url, str(repo_dir)], check=True)
 
-          # 彻底删除 content/post 目录再重建
           target_post_dir = repo_dir / TARGET_DIR
           if target_post_dir.exists():
               shutil.rmtree(target_post_dir)
           target_post_dir.mkdir(parents=True, exist_ok=True)
 
-          # 生成每个 Issue 的文件夹及两个文件
           for issue in issues:
               number = issue['number']
               created_at = issue['created_at']
@@ -123,26 +118,25 @@ jobs:
               folder_path = target_post_dir / folder_name
               folder_path.mkdir(parents=True, exist_ok=True)
 
-              # 中文版本 index.cn.md
-              cn_content = generate_index_md(issue, 'cn')
-              with open(folder_path / "index.cn.md", 'w', encoding='utf-8') as f:
-                  f.write(cn_content)
+              # 中文版本 index.zh.md（关键修改）
+              zh_content = generate_index_md(issue, 'zh')
+              with open(folder_path / "index.zh.md", 'w', encoding='utf-8') as f:
+                  f.write(zh_content)
 
               # 英文版本 index.en.md
               en_content = generate_index_md(issue, 'en')
               with open(folder_path / "index.en.md", 'w', encoding='utf-8') as f:
                   f.write(en_content)
 
-              print(f"Created {folder_name}/index.cn.md & index.en.md")
+              print(f"Created {folder_name}/index.zh.md & index.en.md")
 
-          # 提交并推送
           os.chdir(repo_dir)
           subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
           subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], check=True)
           subprocess.run(["git", "add", TARGET_DIR], check=True)
           result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
           if result.stdout.strip():
-              subprocess.run(["git", "commit", "-m", f"Sync all issues from {SOURCE_REPO} (full refresh, Page Bundles)"], check=True)
+              subprocess.run(["git", "commit", "-m", f"Sync all issues from {SOURCE_REPO} (full refresh, Page Bundles) [skip ci]"], check=True)
               subprocess.run(["git", "push"], check=True)
               print("Pushed changes.")
           else:
